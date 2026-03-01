@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "description": "AI 工具配置看板",
   "bin": {
-    "dashboard": "./dist/dashboard.js"
+    "ws": "./dist/dashboard.js"
   },
   "files": [
     "dist"
