@@ -125,12 +125,37 @@ async function runMcpInstall(): Promise<void> {
   outro(`已写入 ${Object.keys(mcpServers).length} 个服务器 → .mcp.json`)
 }
 
+const mcpListCommand = defineCommand({
+  meta: { name: 'list', description: '查看缓存的 MCP 服务器列表' },
+  async run() {
+    const config = await loadWsConfig()
+    const servers = config.mcp?.servers ?? {}
+    const names = Object.keys(servers)
+    if (names.length === 0) {
+      console.log('缓存为空，请先运行 ws mcp -c')
+      return
+    }
+    const collectedAt = config.mcp?.collectedAt
+      ? new Date(config.mcp.collectedAt).toLocaleString('zh-CN')
+      : '未知'
+    console.log(`缓存时间：${collectedAt}\n`)
+    for (const name of names) {
+      console.log(`  ${name}`)
+    }
+    console.log(`\n共 ${names.length} 个服务器`)
+  },
+})
+
 export const mcpCommand = defineCommand({
   meta: { name: 'mcp', description: '管理当前项目 MCP 配置' },
   args: {
     collect: { type: 'boolean', alias: 'c', description: '收集系统 MCP 配置到缓存' },
   },
-  async run({ args }) {
+  subCommands: {
+    list: mcpListCommand,
+  },
+  async run({ args, rawArgs }) {
+    if (rawArgs[0] === 'list') return
     if (args.collect) await runMcpCollect()
     else await runMcpInstall()
   },

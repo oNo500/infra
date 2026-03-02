@@ -62,15 +62,16 @@ export async function collectGit(): Promise<GitInfo> {
       const info = await getLastCommitInfo(repoPath)
       if (!info) return null
       if (now - info.timestamp > SEVEN_DAYS_MS) return null
-      return { name, lastCommit: info.relativeTime, branch: info.branch, msg: info.msg }
+      return { name, lastCommit: info.relativeTime, timestamp: info.timestamp, branch: info.branch, msg: info.msg }
     }),
   )
 
   const projects = results
     .filter(
-      (r): r is { name: string; lastCommit: string; branch: string; msg: string } => r !== null,
+      (r): r is { name: string; lastCommit: string; timestamp: number; branch: string; msg: string } => r !== null,
     )
-    .sort((a, b) => a.name.localeCompare(b.name))
+    .sort((a, b) => b.timestamp - a.timestamp)
+    .map(({ timestamp: _ts, ...rest }) => rest)
 
   return { projects }
 }
