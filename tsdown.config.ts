@@ -1,7 +1,7 @@
 import { defineConfig } from "tsdown";
 
 export default defineConfig({
-  entry: ["./src/dashboard.tsx"],
+  entry: ["./src/dashboard.ts"],
   format: ["esm"],
   outDir: "dist",
   platform: "node",

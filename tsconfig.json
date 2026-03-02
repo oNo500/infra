@@ -15,9 +15,7 @@
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,
-    "allowImportingTsExtensions": true,
-    "jsx": "react-jsx",
-    "jsxImportSource": "react"
+    "allowImportingTsExtensions": true
   },
   "include": ["src"]
 }

@@ -1,14 +1,11 @@
+import { colors } from "consola/utils";
+
 export type BadgeStatus = "ok" | "warn" | "off";
 
-export interface BadgeInfo {
-  symbol: string;
-  color: string;
-}
-
-export function badge(status: BadgeStatus): BadgeInfo {
+export function badge(status: BadgeStatus): string {
   switch (status) {
-    case "ok":   return { symbol: "●", color: "green" };
-    case "warn": return { symbol: "◐", color: "yellow" };
-    case "off":  return { symbol: "○", color: "gray" };
+    case "ok":   return colors.green("●");
+    case "warn": return colors.yellow("◐");
+    case "off":  return colors.gray("○");
   }
 }
