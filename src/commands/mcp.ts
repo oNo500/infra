@@ -98,7 +98,6 @@ async function runMcpInstall(): Promise<void> {
   const options = cached.map((s) => ({
     value: s.name,
     label: s.name,
-    hint: formatSourceHint(s),
   }))
   const initialValues = cached.filter((s) => preselectedNames.has(s.name)).map((s) => s.name)
 

@@ -5,14 +5,9 @@ import type { McpServer } from '../collectors/mcp-sources.js'
 
 const CONFIG_PATH = join(homedir(), '.ws.json')
 
-interface CachedMcpServer {
-  source: McpServer['source']
-  config: Record<string, unknown>
-}
-
 interface WsConfig {
   mcp?: {
-    servers?: Record<string, CachedMcpServer>
+    servers?: Record<string, Record<string, unknown>>
     collectedAt?: string
   }
 }
@@ -28,9 +23,9 @@ export async function loadWsConfig(): Promise<WsConfig> {
 
 export async function saveMcpCache(servers: McpServer[]): Promise<void> {
   const existing = await loadWsConfig()
-  const serversMap: Record<string, CachedMcpServer> = {}
+  const serversMap: Record<string, Record<string, unknown>> = {}
   for (const s of servers) {
-    serversMap[s.name] = { source: s.source, config: s.config }
+    serversMap[s.name] = s.config
   }
   const updated: WsConfig = {
     ...existing,
@@ -44,9 +39,9 @@ export async function saveMcpCache(servers: McpServer[]): Promise<void> {
 
 export function cachedServersToMcpServers(config: WsConfig): McpServer[] {
   const servers = config.mcp?.servers ?? {}
-  return Object.entries(servers).map(([name, { source, config: cfg }]) => ({
+  return Object.entries(servers).map(([name, cfg]) => ({
     name,
-    source,
+    source: 'user' as const,
     config: cfg,
   }))
 }

@@ -113,7 +113,7 @@ export async function collectMcpSources(): Promise<McpSources> {
 
 export function formatSourceHint(server: McpServer): string {
   if (server.source === 'project') return '当前项目'
-  if (server.source === 'user') return '用户级 (~/.claude.json)'
-  if (server.source === 'local') return '本地私有 (~/.claude.json local)'
-  return `~/code/${server.source.replace(/^project:/, '')}`
+  if (server.source === 'user') return '用户级'
+  if (server.source === 'local') return '本地私有'
+  return server.source.replace(/^project:/, '')
 }
