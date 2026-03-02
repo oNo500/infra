@@ -20,7 +20,7 @@ export interface CursorInfo {
 }
 
 export interface SkillInfo {
-  names: string[]
+  skills: Array<{ name: string; description: string | null }>
 }
 
 export interface GitInfo {
@@ -47,7 +47,7 @@ const cjkWidth = (s: string) =>
   [...s].reduce((w, c) => w + (c.charCodeAt(0) > 0x2e7f ? 2 : 1), 0)
 const pad = (s: string, w: number) => s + ' '.repeat(Math.max(0, w - cjkWidth(s)))
 
-function printHeader(): void {
+function printHeader(title = ' AI 工具链状态 '): void {
   const now = new Date().toLocaleString('zh-CN', {
     timeZone: 'Asia/Shanghai',
     year: 'numeric',
@@ -57,7 +57,6 @@ function printHeader(): void {
     minute: '2-digit',
     second: '2-digit',
   })
-  const title = ' AI 工具链状态 '
   const timeStr = ` ${now} `
   const inner = 62
   const totalUsed = cjkWidth(title) + cjkWidth(timeStr)
@@ -120,13 +119,12 @@ export function formatDashboard(data: DashboardData): void {
 
   // ── Skills ──
   section('已安装 Skills')
-  if (data.skills.names.length > 0) {
-    const names = data.skills.names
-    for (let i = 0; i < names.length; i += 2) {
-      const leftName = names[i]
-      const left = '  ' + leftName + ' '.repeat(Math.max(1, 27 - leftName.length))
-      const right = names[i + 1] ?? ''
-      console.log(left + right)
+  if (data.skills.skills.length > 0) {
+    for (const skill of data.skills.skills) {
+      const nameStr = pad(skill.name, 28)
+      const rawDesc = skill.description?.split(/[.。]/)[0] ?? ''
+      const desc = rawDesc ? chalk.gray(rawDesc.slice(0, 50)) : ''
+      console.log(`  ${badgeOk(nameStr)}${desc}`)
     }
   } else {
     console.log(`  ${badgeOff('无')}`)
@@ -168,7 +166,7 @@ export function formatDashboard(data: DashboardData): void {
 }
 
 export function formatNote(data: ObsidianInfo): void {
-  printHeader()
+  printHeader(' Obsidian 笔记库 ')
 
   section('Obsidian 笔记库')
 
