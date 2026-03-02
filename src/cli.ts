@@ -17,10 +17,12 @@ const main = defineCommand({
   },
   subCommands: {
     note: () => import('./commands/note.js').then((m) => m.noteCommand),
+    mcp: () => import('./commands/mcp.js').then((m) => m.mcpCommand),
   },
   async run({ args, rawArgs }) {
     // subCommands 匹配时 citty 仍会调用根 run，用 rawArgs 判断跳过
     if (rawArgs[0] === 'note') return
+    if (rawArgs[0] === 'mcp') return
     if (args.note) {
       await runNote()
     } else {
