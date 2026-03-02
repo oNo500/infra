@@ -27,6 +27,22 @@ export interface GitInfo {
   projects: Array<{ name: string; lastCommit: string; branch: string; msg: string }>
 }
 
+export interface ProjectInfo {
+  root: string | null
+  name: string | null
+  claudeMd: { exists: boolean; lines: number; title: string | null }
+  dotClaude: {
+    exists: boolean
+    hasSettings: boolean
+    hasHooks: boolean
+    hasCommands: boolean
+    hasSkills: boolean
+    permissionCount: number
+  }
+  mcpJson: { exists: boolean; serverCount: number; servers: string[] }
+  cursorRules: boolean
+}
+
 export interface ObsidianInfo {
   exists: boolean
   inboxCount: number
@@ -40,6 +56,7 @@ export interface DashboardData {
   cursor: CursorInfo
   skills: SkillInfo
   git: GitInfo
+  project?: ProjectInfo
 }
 
 // CJK-aware padding
@@ -147,6 +164,51 @@ export function formatDashboard(data: DashboardData): void {
     }
   } else {
     console.log(`  ${badgeOff('未找到配置')}`)
+  }
+
+  // ── 当前项目 ──
+  if (data.project?.root) {
+    const proj = data.project
+    section(`当前项目 · ${proj.name}`)
+
+    // CLAUDE.md
+    if (proj.claudeMd.exists) {
+      const detail = [
+        `${proj.claudeMd.lines} 行`,
+        proj.claudeMd.title ? chalk.gray(proj.claudeMd.title.slice(0, 30)) : '',
+      ].filter(Boolean).join(' · ')
+      console.log(`  ${badgeOk(pad('CLAUDE.md', 14))}${detail}`)
+    } else {
+      console.log(`  ${badgeOff(pad('CLAUDE.md', 14))}${chalk.gray('未配置')}`)
+    }
+
+    // .claude/
+    if (proj.dotClaude.exists) {
+      const parts: string[] = []
+      if (proj.dotClaude.hasSettings) parts.push('settings')
+      if (proj.dotClaude.permissionCount > 0) parts.push(`${proj.dotClaude.permissionCount} 条权限`)
+      if (proj.dotClaude.hasHooks) parts.push('hooks')
+      if (proj.dotClaude.hasCommands) parts.push('commands')
+      if (proj.dotClaude.hasSkills) parts.push('skills')
+      console.log(`  ${badgeOk(pad('.claude/', 14))}${parts.join(' · ')}`)
+    } else {
+      console.log(`  ${badgeOff(pad('.claude/', 14))}${chalk.gray('未配置')}`)
+    }
+
+    // .mcp.json
+    if (proj.mcpJson.exists) {
+      const srvStr = proj.mcpJson.servers.slice(0, 4).join(', ')
+      console.log(`  ${badgeOk(pad('.mcp.json', 14))}${chalk.white(proj.mcpJson.serverCount)} 个服务器${srvStr ? chalk.gray(' · ' + srvStr) : ''}`)
+    } else {
+      console.log(`  ${badgeOff(pad('.mcp.json', 14))}${chalk.gray('未配置')}`)
+    }
+
+    // Cursor rules
+    if (proj.cursorRules) {
+      console.log(`  ${badgeOk(pad('Cursor rules', 14))}`)
+    } else {
+      console.log(`  ${badgeOff(pad('Cursor rules', 14))}${chalk.gray('未配置')}`)
+    }
   }
 
   // ── Git ──
