@@ -9,7 +9,7 @@ export interface ClaudeInfo {
 }
 
 export interface McpInfo {
-  servers: Array<{ name: string; pkg: string }>
+  servers: Array<{ name: string; pkg: string; source?: string }>
 }
 
 export interface CursorInfo {
@@ -128,7 +128,7 @@ export function formatDashboard(data: DashboardData): void {
   section('MCP 服务器')
   if (data.mcp.servers.length > 0) {
     for (const srv of data.mcp.servers) {
-      console.log(`  ${badgeOk(srv.name.padEnd(22))}${chalk.gray(srv.pkg)}`)
+      console.log(`  ${badgeOk(srv.name.padEnd(22))}${chalk.gray(srv.pkg)}${srv.source ? chalk.dim(` [${srv.source}]`) : ''}`)
     }
   } else {
     console.log(`  ${badgeOff('未配置')}`)

@@ -85,6 +85,27 @@ async function scanOtherProjects(excludeRoot: string | null): Promise<McpServer[
   }
 }
 
+async function scanClaudeJsonProjects(excludeRoot: string | null): Promise<McpServer[]> {
+  try {
+    const raw = await readFile(CLAUDE_JSON, 'utf-8')
+    const json = JSON.parse(raw)
+    const projects: Record<string, any> = json.projects ?? {}
+    const results: McpServer[] = []
+    for (const [projPath, projVal] of Object.entries(projects)) {
+      if (excludeRoot && projPath === excludeRoot) continue
+      const serversObj: Record<string, Record<string, unknown>> = projVal.mcpServers ?? {}
+      if (Object.keys(serversObj).length === 0) continue
+      const label = projPath.split('/').pop() ?? projPath
+      for (const [name, config] of Object.entries(serversObj)) {
+        results.push({ name, source: `project:${label}`, config })
+      }
+    }
+    return results
+  } catch {
+    return []
+  }
+}
+
 function merge(
   currentProject: McpServer[],
   user: McpServer[],
@@ -101,12 +122,15 @@ function merge(
 
 export async function collectMcpSources(): Promise<McpSources> {
   const root = gitRoot()
-  const [currentProject, user, local, otherProjects] = await Promise.all([
+  const [currentProject, user, local, otherProjectsMcp, otherProjectsClaude] = await Promise.all([
     root ? parseMcpJson(join(root, '.mcp.json'), 'project') : Promise.resolve([]),
     parseClaudeJsonUser(),
     root ? parseClaudeJsonLocal(root) : Promise.resolve([]),
     scanOtherProjects(root),
+    scanClaudeJsonProjects(root),
   ])
+  // 合并两种来源的其他项目，.mcp.json 优先（同名同项目时）
+  const otherProjects = [...otherProjectsClaude, ...otherProjectsMcp]
   const merged = merge(currentProject, user, local, otherProjects)
   return { currentProject, user, local, otherProjects, merged, gitRoot: root }
 }
